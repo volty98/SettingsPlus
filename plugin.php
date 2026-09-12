@@ -19,7 +19,7 @@ class pluginSettingsPlus extends Plugin
         $html .= '<div class="card-body">';
 
         $html .= '<h4 class="card-title">Settings Plus</h4>';
-        $html .= '<p class="card-text">Extension to &lt;Settings - General&gt;</p>';
+        $html .= '<p class="card-text">Extension to Settings</p>';
 
         $html .= '</div>'; // card-body
         $html .= '</div>'; // card
@@ -38,30 +38,38 @@ class pluginSettingsPlus extends Plugin
     /* ---------------------------------------------------------
      * Admin ページの HTML を拡張
      * --------------------------------------------------------- */
-    public function adminPageBegin()
+    public function adminHead()
     {
         global $page;
 
-        if ($page->slug() !== 'admin') return;
-
+        // CSS ファイルを読み込む
         echo '<link rel="stylesheet" href="' . $this->cssFile . '">';
     }
-
-    public function adminPageEnd()
+    public function adminBodyEnd()
     {
         global $page;
 
-        if ($page->slug() !== 'admin') return;
-
-        // '/admin/settings'のliの表示に「PLUS」を追加
-        echo '<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var settingsLi = document.querySelector("li a[href=\'/admin/settings\']");
-            if (settingsLi) {
-                settingsLi.innerHTML += " <span class=\"badge badge-primary\">PLUS</span>";
-            }
-        });
+        $html = '<script>
+            $(document).ready(function() {
+                // /admin/settings の次にliを追加してメニューを拡張する
+                $("a[href=\"/admin/settings\"]").parent().after("<li class=\"nav-item\"><a class=\"nav-link\" href=\"/admin/configure-plugin/pluginSettingsPlus\"><span class=\"fa fa-gears\"></span>Settings Plus</a></li>");
+            });
         </script>';
+        
+        return $html;
+        // return $page; // この行は不要になったのでコメントアウト
+    }
+
+    public function adminSidebar()
+    {
+        global $page;
+
+        // サイドバーに「Settings Plus」リンクを追加
+        // echo '<li class="nav-item">
+        //     <a class="nav-link" href="/admin/settings-plus">Settings Plus</a>
+        // </li>';
+
+        return $page;
 
     }
 
