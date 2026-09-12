@@ -1,2 +1,2 @@
 # SettingsPlus
-Extention to settings in admin for Bludit.
+Extension to settings in admin for Bludit.
