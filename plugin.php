@@ -5,7 +5,7 @@ class pluginSettingsPlus extends Plugin
     private $pluginName;
     private $cssFile;
     private $uploadsDir;
-    private $siteFaviconPath = '';
+    private $faviconAdminPath = '';
 
     public function init()
     {
@@ -21,8 +21,8 @@ class pluginSettingsPlus extends Plugin
             @mkdir($this->uploadsDir, 0755, true);
         }
 
-        // サイトのファビコンパスを初期化
-        $this->siteFaviconPath = HTML_PATH_UPLOADS . $this->pluginName . '/';
+        // adminのファビコンパスを初期化
+        $this->faviconAdminPath = HTML_PATH_UPLOADS . $this->pluginName . '/';
 
         // データベースフィールドの初期値を設定
         $this->dbFields = array(
@@ -54,21 +54,35 @@ class pluginSettingsPlus extends Plugin
         // adminのファビコンにサイトのファビコンを適用させる
 		$html .= '<div>';
 		$html .= '<label>' . 'Favicon in the admin' . '</label>';
-		$html .= '<input name="faviconAdminFile" id="jsfaviconAdminFile" type="file" accept="image/x-icon,image/png,image/jpeg">';
-		$html .= '<small>' . 'Upload ICO, PNG, or JPG file' . '</small>';
-		if ($this->getValue('faviconAdmin')) {
-			$html .= '<div style="margin-top: 10px;">';
-			$html .= '<strong>Current:</strong> ' . htmlspecialchars(basename($this->getValue('faviconAdmin')));
-			$html .= '</div>';
-		}
+		$html .= '<input id="faviconAdminFile" name="faviconAdminFile" type="file" accept="image/x-icon,image/png,image/jpeg" style="display:none;">';
+        $html .= '<div style="display: flex; align-items: center; gap: 10px;">';
+        $html .= '<img id="faviconAdminFilename" src="' . $this->getValue('faviconAdmin') . '" alt="Favicon" style="max-width:64px; max-height:64px;">';
+		$html .= '<label for="faviconAdminFile" class="btn btn-sm btn-outline-secondary">Upload favicon</label>';
 		$html .= '</div>';
+		$html .= '</div>';
+
+        // ファイル選択後に自動送信
+        $html .= '<script>';
+        $html .= 'document.getElementById("faviconAdminFile").addEventListener("change", function() {';
+        $html .= '  var form = document.querySelector("form");';
+        $html .= '  if (form) form.submit();';
+        $html .= '});';
+        $html .= '</script>';
+
+        // フォーム全体に enctype を設定
+        $html .= '<script>';
+        $html .= 'document.addEventListener("DOMContentLoaded", function() {';
+        $html .= '  var form = document.querySelector("form");';
+        $html .= '  if (form) form.setAttribute("enctype", "multipart/form-data");';
+        $html .= '});';
+        $html .= '</script>';
 
         // デバッグ要素として実際に保存された値を表示
         $html .= '<h6 class="mt-4 mb-2 border-bottom">Actual saved value (debug)</h6>';
         $html .= '<div class="card-body card metric-card" style="display:block;">';
         $html .= '<pre>';
-        $html .= 'displaySiteTitle value: ' . var_export($this->getValue('displaySiteTitle'), true) . "(" . gettype($this->getValue('displaySiteTitle')) . ")" . "\n";
-        $html .= 'faviconAdmin value: ' . var_export($this->getValue('faviconAdmin'), true) . "(" . gettype($this->getValue('faviconAdmin')) . ")" . "\n";
+        $html .= 'displaySiteTitle: ' . var_export($this->getValue('displaySiteTitle'), true) . "(" . gettype($this->getValue('displaySiteTitle')) . ")" . "\n";
+        $html .= 'faviconAdmin: ' . var_export($this->getValue('faviconAdmin'), true) . "(" . gettype($this->getValue('faviconAdmin')) . ")" . "\n";
         $html .= '</pre>';
         $html .= '</div>';
 
@@ -80,14 +94,20 @@ class pluginSettingsPlus extends Plugin
      * --------------------------------------------------------- */
     public function post()
     {
+        // 親クラスの post() を呼び出して自動マッピングを実行
+        // これにより displaySiteTitle などが自動的にDBに保存される
+        parent::post();
+
+        // 追加処理が必要な場合は以下に記述する
+        $file = $_FILES['faviconAdminFile'] ?? null;
+        
         // ファイルアップロード処理
-        if (isset($_FILES['faviconAdminFile']) && $_FILES['faviconAdminFile']['error'] === UPLOAD_ERR_OK) {
+        if (isset($file)) {
             $uploadDir = PATH_UPLOADS . $this->pluginName . DS;
             if (!is_dir($uploadDir)) {
                 @mkdir($uploadDir, 0755, true);
             }
 
-            $file = $_FILES['faviconAdminFile'];
             $allowedTypes = ['image/x-icon', 'image/png', 'image/jpeg'];
             $allowedExtensions = ['ico', 'png', 'jpg', 'jpeg'];
 
@@ -103,23 +123,31 @@ class pluginSettingsPlus extends Plugin
             }
 
             // 新しいファイル名を生成
-            $newFilename = 'favicon-' . time() . '.' . $ext;
+            $newFilename = 'faviconAdmin.' . $ext;
             $filepath = $uploadDir . $newFilename;
+            // パスをデータベースに保存（相対パス）
+            $this->db['faviconAdmin'] = HTML_PATH_UPLOADS . $this->pluginName . '/' . $newFilename;
 
             // ファイルを移動
             if (move_uploaded_file($file['tmp_name'], $filepath)) {
                 // 古いファイルを削除
-                if ($this->getValue('faviconAdmin')) {
-                    $oldPath = $uploadDir . basename($this->getValue('faviconAdmin'));
-                    if (file_exists($oldPath)) {
-                        @unlink($oldPath);
+                $oldFaviconPath = $this->getValue('faviconAdmin');
+                if (!empty($oldFaviconPath)) {
+                    // getValue() が返すのは URL パス（例：uploads/SettingsPlus/favicon.ico）
+                    // 実際のファイルパスは PATH_UPLOADS + SettingsPlus + ファイル名
+                    $oldFilename = basename($oldFaviconPath);
+                    $oldFilepath = $uploadDir . $oldFilename;
+                    if (file_exists($oldFilepath) && $oldFilepath !== $filepath) {
+                        @unlink($oldFilepath);
                     }
                 }
-
-                // パスをデータベースに保存（相対パス）
-                $this->faviconAdmin = HTML_PATH_UPLOADS . $this->pluginName . '/' . $newFilename;
+            }
+            else {
+                // ファイル移動失敗時は新しいパス設定を取り消す
+                $this->db['faviconAdmin'] = '';
             }
         }
+        return $this->save();
     }
 
     /* ---------------------------------------------------------
@@ -130,13 +158,15 @@ class pluginSettingsPlus extends Plugin
         global $page;
 
         // CSS ファイルを読み込む（絶対パスで指定）
-        $cssUrl = $this->domainPath() . 'css/SettingsPlus.css';
-        echo '<link rel="stylesheet" href="' . $cssUrl . '">';
+        echo '<link rel="stylesheet" href="' . $this->cssFile . '">';
 
         // Favicon を設定
-        if ($this->getValue('faviconAdmin')) {
-            echo '<link rel="icon" href="' . $this->getValue('faviconAdmin') . '">';
+        //ファイルの存在を確認
+        if (!file_exists(PATH_UPLOADS . $this->pluginName . '/' . basename($this->getValue('faviconAdmin')))) {
+            return;
         }
+        // echo '<link rel="shortcut icon" type="image/x-icon" href="' . DOMAIN_BASE . ltrim($this->getValue('faviconAdmin'), '/') . '?version=65535.0.0">';
+        echo Theme::favicon('img/favicon.png', 'image/x-icon');
     }
     public function adminBodyBegin()
     {
@@ -162,7 +192,7 @@ class pluginSettingsPlus extends Plugin
                     // 新しい li 要素を作成
                     var newLi = $("<li>").addClass("nav-item")
                         .append(
-                            $("<span>").addClass("nav-link")
+                            $("<span>").addClass("nav-link alert alert-secondary")
                             .text("' . htmlspecialchars($title) . '")
                         );
                     
