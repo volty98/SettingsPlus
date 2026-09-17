@@ -1,0 +1,59 @@
+/* ========================================
+   Settings Plus CSS
+   ======================================== */
+
+:root {
+    --sp-primary-color: #4a90e2;
+    --sp-background-color: #f8f9fa;
+    --sp-text-color: #333333;
+    --sp-border-color: #dee2e6;
+    --sp-border-radius: 4px;
+    --sp-padding-base: 12px;
+    --sp-gap-base: 12px;
+}
+
+/* メイン要素のスタイル */
+#siteURL.settingplus {
+    position: relative;
+    width: 100%;
+    padding: var(--sp-padding-base);
+    background-color: var(--sp-background-color);
+    color: var(--sp-text-color);
+    border: 1px solid var(--sp-border-color);
+    border-radius: var(--sp-border-radius);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-gap-base);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#siteURL.settingplus:hover {
+    background-color: #ffffff;
+    border-color: var(--sp-primary-color);
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.15);
+}
+
+/* テキスト要素 */
+#siteURL.settingplus p {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--sp-text-color) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+    display: block !important;
+}
+
+#siteURL.settingplus span {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--sp-text-color) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+    display: inline-block !important;
+}
