@@ -28,7 +28,9 @@ class pluginSettingsPlus extends Plugin
         $this->dbFields = array(
             'displaySiteTitle' => true,
             'faviconAdmin' => '',
-            'enableFaviconAdmin' => false
+            'enableFaviconAdmin' => false,
+            'useFontAwesome' => false,
+            'awesomeURL' => 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css'
         );
     }
 
@@ -71,6 +73,23 @@ class pluginSettingsPlus extends Plugin
 		$html .= '</div>';
 		$html .= '</div>';
 
+        // Font Awesome 使用設定
+        $html .= '<div>';
+        $html .= '<label>' . 'Use Font Awesome' . '</label>';
+        $html .= '<div class="card-body card metric-card" style="display:block;">';
+        $html .= '<select name="useFontAwesome">';
+        $html .= '<option value="true" ' . ($this->getValue('useFontAwesome') === true ? 'selected' : '') . '>Enabled</option>';
+        $html .= '<option value="false" ' . ($this->getValue('useFontAwesome') === false ? 'selected' : '') . '>Disabled</option>';
+        $html .= '</select>';
+        $html .= '<div style="margin-top: 1em;">';
+        $html .= '<input type="text" name="awesomeURL" value="' . $this->getValue('awesomeURL') . '" placeholder="Font Awesome URL">';
+        $html .= '<small>Specify the URL for the Font Awesome CSS file.</small>';
+        $html .= '</div>';
+        $html .= '<hr>';
+        $html .= '<div  style="display: flex; align-items: center; gap: 1em;">When successfully loaded, display house icon:<i class="fa-regular fa-house fa-2x"></i></i></div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
         // ファイル選択後に自動送信
         $html .= '<script>';
         $html .= 'document.getElementById("faviconAdminFile").addEventListener("change", function() {';
@@ -88,15 +107,22 @@ class pluginSettingsPlus extends Plugin
         $html .= '</script>';
 
         // デバッグ要素として実際に保存された値を表示
-        $html .= '<h6 class="mt-4 mb-2 border-bottom">Actual saved value (debug)</h6>';
-        $html .= '<div class="card-body card metric-card" style="display:block;">';
-        $html .= '<pre>';
-        $html .= 'displaySiteTitle: ' . var_export($this->getValue('displaySiteTitle'), true) . "(" . gettype($this->getValue('displaySiteTitle')) . ")" . "\n";
-        $html .= 'enableFaviconAdmin: ' . var_export($this->getValue('enableFaviconAdmin'), true) . "(" . gettype($this->getValue('enableFaviconAdmin')) . ")" . "\n";
-        $html .= 'faviconAdmin: ' . var_export($this->getValue('faviconAdmin'), true) . "(" . gettype($this->getValue('faviconAdmin')) . ")" . "\n";
-        $html .= 'layout: ' . var_export($layout, true) . "(" . gettype($layout) . ")" . "\n";
-        $html .= '</pre>';
-        $html .= '</div>';
+        $html .= '<div id="accordion-basic">
+            <label><a data-toggle="collapse" href="#dbg">Actual saved value (debug)<i class="fa fa-chevron-down"></i></a></label>
+            <div class="card-body card metric-card" style="display:block;">
+            <div id="dbg" class="collapse">';
+        $html .= '<pre>' .
+            'displaySiteTitle: ' . var_export($this->getValue('displaySiteTitle'), true) . "(" . gettype($this->getValue('displaySiteTitle')) . ")" . "\n" .
+            'enableFaviconAdmin: ' . var_export($this->getValue('enableFaviconAdmin'), true) . "(" . gettype($this->getValue('enableFaviconAdmin')) . ")" . "\n" .
+            'faviconAdmin: ' . var_export($this->getValue('faviconAdmin'), true) . "(" . gettype($this->getValue('faviconAdmin')) . ")" . "\n" .
+            'useFontAwesome: ' . var_export($this->getValue('useFontAwesome'), true) . "(" . gettype($this->getValue('useFontAwesome')) . ")" . "\n" .
+            'awesomeURL: ' . var_export($this->getValue('awesomeURL'), true) . "(" . gettype($this->getValue('awesomeURL')) . ")" . "\n" .
+            'layout: ' . var_export($layout, true) . "(" . gettype($layout) . ")" . "\n" .
+            '</pre>';
+        $html .='</div>
+            </div>
+            </div>';
+
         return $html;
     }
 
@@ -164,6 +190,13 @@ class pluginSettingsPlus extends Plugin
     /* ---------------------------------------------------------
      * Admin ページの HTML を拡張
      * --------------------------------------------------------- */
+    public function siteHead()
+    {
+        // Font Awesome の読み込み
+        if ($this->getValue('useFontAwesome')) {
+            echo '<link rel="stylesheet" href="' . $this->getValue('awesomeURL') . '">';
+        }
+    }
     public function beforeAdminLoad()
     {
         if (!$this->getValue('enableFaviconAdmin')) {
@@ -199,6 +232,10 @@ class pluginSettingsPlus extends Plugin
     }
     public function adminHead()
     {
+        // Font Awesome の読み込み
+        if ($this->getValue('useFontAwesome')) {
+            echo '<link rel="stylesheet" href="' . $this->getValue('awesomeURL') . '">';
+        }
 
     }
     public function adminBodyBegin()
