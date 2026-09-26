@@ -42,88 +42,11 @@ class pluginSettingsPlus extends Plugin
         global $page;
         global $layout;
 
-        // 管理画面フォームの HTML を生成
-		$html = '<div class="alert alert-primary" role="alert">';
-		$html .= $this->description();
-		$html .= '</div>';
+        // HTML生成は render_form.php に委譲
+        $html_render = ''; // use in render_form.php
+        include($this->phpPath() . 'render_form.php');
 
-        // サイトタイトル表示設定
-		$html .= '<div>';
-		$html .= '<label>' . 'Display site title in the admin sidebar' . '</label>';
-		$html .= '<select name="displaySiteTitle">';
-		$html .= '<option value="true" ' . ($this->getValue('displaySiteTitle') === true ? 'selected' : '') . '>Enabled</option>';
-		$html .= '<option value="false" ' . ($this->getValue('displaySiteTitle') === false ? 'selected' : '') . '>Disabled</option>';
-		$html .= '</select>';
-		$html .= '</div>';
-
-        // adminのファビコンにサイトのファビコンを適用させる
-		$html .= '<div>';
-		$html .= '<label>' . 'Favicon in the admin' . '</label>';
-        $html .= '<div class="card-body card metric-card" style="display:block;">';
-		$html .= '<select name="enableFaviconAdmin">';
-		$html .= '<option value="true" ' . ($this->getValue('enableFaviconAdmin') === true ? 'selected' : '') . '>Enabled</option>';
-		$html .= '<option value="false" ' . ($this->getValue('enableFaviconAdmin') === false ? 'selected' : '') . '>Disabled</option>';
-		$html .= '</select>';
-		$html .= '<input id="faviconAdminFile" name="faviconAdminFile" type="file" accept="image/png" style="display:none;">';
-        $html .= '<div style="display: flex; align-items: center; gap: 10px;">';
-        $html .= '<img id="faviconAdminFilename" src="' . $this->getValue('faviconAdmin') . '" alt="Favicon" style="max-width:64px; max-height:64px;">';
-		$html .= '<label for="faviconAdminFile" class="btn btn-sm btn-outline-secondary">Upload favicon</label>';
-		$html .= '</div>';
-        $html .= '<small>Need to clear cache after uploading a new favicon.</small>';
-		$html .= '</div>';
-		$html .= '</div>';
-
-        // Font Awesome 使用設定
-        $html .= '<div>';
-        $html .= '<label>' . 'Use Font Awesome' . '</label>';
-        $html .= '<div class="card-body card metric-card" style="display:block;">';
-        $html .= '<select name="useFontAwesome">';
-        $html .= '<option value="true" ' . ($this->getValue('useFontAwesome') === true ? 'selected' : '') . '>Enabled</option>';
-        $html .= '<option value="false" ' . ($this->getValue('useFontAwesome') === false ? 'selected' : '') . '>Disabled</option>';
-        $html .= '</select>';
-        $html .= '<div style="margin-top: 1em;">';
-        $html .= '<input type="text" name="awesomeURL" value="' . $this->getValue('awesomeURL') . '" placeholder="Font Awesome URL">';
-        $html .= '<small>Specify the URL for the Font Awesome CSS file.</small>';
-        $html .= '</div>';
-        $html .= '<hr>';
-        $html .= '<div  style="display: flex; align-items: center; gap: 1em;">When successfully loaded, display house icon:<i class="fa-regular fa-house fa-2x"></i></i></div>';
-        $html .= '</div>';
-        $html .= '</div>';
-
-        // ファイル選択後に自動送信
-        $html .= '<script>';
-        $html .= 'document.getElementById("faviconAdminFile").addEventListener("change", function() {';
-        $html .= '  var form = document.querySelector("form");';
-        $html .= '  if (form) form.submit();';
-        $html .= '});';
-        $html .= '</script>';
-
-        // フォーム全体に enctype を設定
-        $html .= '<script>';
-        $html .= 'document.addEventListener("DOMContentLoaded", function() {';
-        $html .= '  var form = document.querySelector("form");';
-        $html .= '  if (form) form.setAttribute("enctype", "multipart/form-data");';
-        $html .= '});';
-        $html .= '</script>';
-
-        // デバッグ要素として実際に保存された値を表示
-        $html .= '<div id="accordion-basic">
-            <label><a data-toggle="collapse" href="#dbg">Actual saved value (debug)<i class="fa fa-chevron-down"></i></a></label>
-            <div class="card-body card metric-card" style="display:block;">
-            <div id="dbg" class="collapse">';
-        $html .= '<pre>' .
-            'displaySiteTitle: ' . var_export($this->getValue('displaySiteTitle'), true) . "(" . gettype($this->getValue('displaySiteTitle')) . ")" . "\n" .
-            'enableFaviconAdmin: ' . var_export($this->getValue('enableFaviconAdmin'), true) . "(" . gettype($this->getValue('enableFaviconAdmin')) . ")" . "\n" .
-            'faviconAdmin: ' . var_export($this->getValue('faviconAdmin'), true) . "(" . gettype($this->getValue('faviconAdmin')) . ")" . "\n" .
-            'useFontAwesome: ' . var_export($this->getValue('useFontAwesome'), true) . "(" . gettype($this->getValue('useFontAwesome')) . ")" . "\n" .
-            'awesomeURL: ' . var_export($this->getValue('awesomeURL'), true) . "(" . gettype($this->getValue('awesomeURL')) . ")" . "\n" .
-            'layout: ' . var_export($layout, true) . "(" . gettype($layout) . ")" . "\n" .
-            '</pre>';
-        $html .='</div>
-            </div>
-            </div>';
-
-        return $html;
+        return $html_render;
     }
 
     /* ---------------------------------------------------------
@@ -263,7 +186,7 @@ class pluginSettingsPlus extends Plugin
                     // 新しい li 要素を作成
                     var newLi = $("<li>").addClass("nav-item")
                         .append(
-                            $("<span>").addClass("nav-link alert alert-secondary")
+                            $("<span>").addClass("nav-link alert alert-secondary text-center rounded-pill py-0")
                             .text("' . htmlspecialchars($title) . '")
                         );
                     
