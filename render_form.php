@@ -21,6 +21,18 @@
     $html_render .= '</div>';
     $html_render .= '</div>';
 
+    // コンテンツページ、各ページのカテゴリバッジ表示設定
+    $html_render .= '<div class="form-group row">';
+    $html_render .= '<label class="col-sm-4 col-form-label" for="displayContentCategoryName">' . 'Display content category name' . '</label>';
+    $html_render .= '<div class="col-sm-8">';
+    $html_render .= '<select class="custom-select" id="displayContentCategoryName" name="displayContentCategoryName">';
+    $html_render .= '<option value="true" ' . ($this->getValue('displayContentCategoryName') === true ? 'selected' : '') . '>Enabled</option>';
+    $html_render .= '<option value="false" ' . ($this->getValue('displayContentCategoryName') === false ? 'selected' : '') . '>Disabled</option>';
+    $html_render .= '</select>';
+    $html_render .= '<small class="form-text text-muted">' . 'Display the content category name in the content.' . '</small>';
+    $html_render .= '</div>';
+    $html_render .= '</div>';
+
     // adminのファビコンにサイトのファビコンを適用させる
     $html_render .= '<div class="form-group row">';
     $html_render .= '<label class="col-sm-4 col-form-label" for="enableFaviconAdmin">' . 'Favicon in the admin' . '</label>';

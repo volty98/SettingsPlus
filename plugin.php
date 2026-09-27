@@ -27,6 +27,7 @@ class pluginSettingsPlus extends Plugin
         // データベースフィールドの初期値を設定
         $this->dbFields = array(
             'displaySiteTitle' => true,
+            'displayContentCategoryName' => false,
             'faviconAdmin' => '',
             'enableFaviconAdmin' => false,
             'useFontAwesome' => false,
@@ -42,9 +43,12 @@ class pluginSettingsPlus extends Plugin
         global $page;
         global $layout;
 
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
         // HTML生成は render_form.php に委譲
+        // includeなので$pageや$layout変数をそのまま使用できる
         $html_render = ''; // use in render_form.php
         include($this->phpPath() . 'render_form.php');
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
         return $html_render;
     }
@@ -111,17 +115,21 @@ class pluginSettingsPlus extends Plugin
     }
 
     /* ---------------------------------------------------------
-     * Admin ページの HTML を拡張
+     * Web site のHTMLを拡張
      * --------------------------------------------------------- */
     public function siteHead()
     {
-        // Font Awesome の読み込み
+        // use Font Awesome
         if ($this->getValue('useFontAwesome')) {
             echo '<link rel="stylesheet" href="' . $this->getValue('awesomeURL') . '">';
         }
     }
+    /* ---------------------------------------------------------
+     * Admin ページのHTMLを拡張
+     * --------------------------------------------------------- */
     public function beforeAdminLoad()
     {
+        // Favicon in the admin
         if (!$this->getValue('enableFaviconAdmin')) {
             return;
         }
@@ -129,6 +137,7 @@ class pluginSettingsPlus extends Plugin
     }
     public function afterAdminLoad()
     {
+        // Favicon in the admin
         if (!$this->getValue('enableFaviconAdmin')) {
             return;
         }
@@ -168,34 +177,80 @@ class pluginSettingsPlus extends Plugin
 
     public function adminBodyEnd()
     {
-        if (!$this->getValue('displaySiteTitle')) {
-            return;
-        }
-        // サイトタイトルを取得して返す
-        global $site;
-        $title = $site->title();
+        global $site, $layout, $categories, $pages;
 
-        $html = '<script>
-            $(document).ready(function() {
-                // BLUDIT テキストを含む li を探す
-                var bluditLi = $(".nav-item").filter(function() {
-                    return $(this).text().includes("BLUDIT");
-                });
-                
-                if (bluditLi.length > 0) {
-                    // 新しい li 要素を作成
-                    var newLi = $("<li>").addClass("nav-item")
-                        .append(
-                            $("<span>").addClass("nav-link alert alert-secondary text-center rounded-pill py-0")
-                            .text("' . htmlspecialchars($title) . '")
-                        );
-                    
-                    // BLUDIT の次に挿入
-                    bluditLi.after(newLi);
+        $html = '';
+
+        if($layout['view'] == 'content' && $this->getValue('displayContentCategoryName')) {
+            // ページとカテゴリのマッピングを作成
+            $items = $pages->getList(1, -1, true);
+            $pageCategoryMap = [];
+
+            foreach ($items as $key) {
+                $p = buildPage($key);
+                $k = $p->key();
+                $c = $p->category();
+                if(!empty($c)) {
+                    $pageCategoryMap[$k] = $c;
                 }
-            });
-        </script>';
-        
+                else {
+                    // カテゴリが空の場合はカテゴリマップに追加しない
+                    // $pageCategoryMap[$k] = '';
+                }
+                // echo $p->category() . ': ' . $p->key() . '<br>';
+            }
+            // JSONとしてJS変数を定義
+            $jsCategories = json_encode($pageCategoryMap);
+            $html .= '<!-- Display content category name -->';
+            $html .= '<script> var pageCategoryMap = ' . $jsCategories . ';</script>';
+            $html .= '<script>
+                $(document).ready(function() {
+                    $("tbody td.contentURL a").each(function() {
+                        var title = $(this).attr("title");
+                        
+                        if (title) {
+                            // スラッシュ以降の文字列をキーとして抽出
+                            var parts = title.split("/");
+                            var pageKey = parts.pop(); 
+                            
+                            // マップに存在すればカテゴリを表示
+                            if (pageCategoryMap.hasOwnProperty(pageKey)) {
+                                var categoryName = pageCategoryMap[pageKey];
+                                $(this).closest("td.contentURL").prepend(
+                                    \'<span class="align-middle mr-1">\' + "(" + categoryName + ")" + \'</span>\'
+                                );
+                            }
+                        }
+                    });
+                });
+                </script>';
+        }
+
+        if ($this->getValue('displaySiteTitle')) {
+            // Site title in the admin sidebar
+            $title = $site->title();
+
+            $html .= '<script>
+                $(document).ready(function() {
+                    // BLUDIT テキストを含む li を探す
+                    var bluditLi = $(".nav-item").filter(function() {
+                        return $(this).text().includes("BLUDIT");
+                    });
+                    
+                    if (bluditLi.length > 0) {
+                        // 新しい li 要素を作成
+                        var newLi = $("<li>").addClass("nav-item")
+                            .append(
+                                $("<span>").addClass("nav-link alert alert-secondary text-center rounded-pill py-0")
+                                .text("' . htmlspecialchars($title) . '")
+                            );
+                        
+                        // BLUDIT の次に挿入
+                        bluditLi.after(newLi);
+                    }
+                });
+            </script>';
+        }        
         return $html;
     }
 
@@ -214,6 +269,9 @@ class pluginSettingsPlus extends Plugin
 
     }
 
+    public function adminView()
+    {
+    }
 
 
     /* ---------------------------------------------------------
