@@ -119,10 +119,10 @@ class pluginSettingsPlus extends Plugin
      * --------------------------------------------------------- */
     public function siteHead()
     {
-        // use Font Awesome
-        if ($this->getValue('useFontAwesome')) {
-            echo '<link rel="stylesheet" href="' . $this->getValue('awesomeURL') . '">';
-        }
+        // // use Font Awesome
+        // if ($this->getValue('useFontAwesome')) {
+        //     echo '<link rel="stylesheet" href="' . $this->getValue('awesomeURL') . '">';
+        // }
     }
     /* ---------------------------------------------------------
      * Admin ページのHTMLを拡張
