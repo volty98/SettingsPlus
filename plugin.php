@@ -31,7 +31,9 @@ class pluginSettingsPlus extends Plugin
             'faviconAdmin' => '',
             'enableFaviconAdmin' => false,
             'useFontAwesome' => false,
-            'awesomeURL' => 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css'
+            'awesomeURL' => 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css',
+            'maintenanceMode' => false,
+            'maintenanceMessage' => 'The site is currently in maintenance mode.',
         );
     }
 
@@ -124,6 +126,25 @@ class pluginSettingsPlus extends Plugin
         //     echo '<link rel="stylesheet" href="' . $this->getValue('awesomeURL') . '">';
         // }
     }
+    public function siteBodyBegin()
+    {
+        ob_start();
+    }
+    public function siteBodyEnd()
+    {
+        $html = ob_get_clean();
+        $maintenanceMessage = $this->getValue('maintenanceMessage');
+        // Maintenance mode notice
+        if ($this->getValue('maintenanceMode')) {
+            $html = '<html><body>' .
+                '<div class="shadow-lg alert alert-info mx-5 px-5 text-center" role="alert">' .
+                '<h4 class="alert-heading">Maintenance Mode</h4>' .
+                $maintenanceMessage . '</div>' .
+                '</body></html>';
+        }
+
+        return $html;
+    }
     /* ---------------------------------------------------------
      * Admin ページのHTMLを拡張
      * --------------------------------------------------------- */
@@ -172,6 +193,10 @@ class pluginSettingsPlus extends Plugin
     }
     public function adminBodyBegin()
     {
+        // Maintenance mode notice
+        if ($this->getValue('maintenanceMode')) {
+            echo '<div class="alert alert-warning my-0 py-1" role="alert">' . 'The site is currently in maintenance mode.' . '</div>';
+        }
     }
 
 
