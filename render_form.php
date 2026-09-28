@@ -52,7 +52,7 @@
     $html_render .= '</div>';
     $html_render .= '</div>';
 
-    $html_render .= '<h6 class="mt-4 mb-2 pb-2 border-bottom text-uppercase">' . 'Admin & website settings' . '</h6>';
+    // $html_render .= '<h6 class="mt-4 mb-2 pb-2 border-bottom text-uppercase">' . 'Admin & website settings' . '</h6>';
 
     // Font Awesome 使用設定
     $html_render .= '<div class="form-group row">';
