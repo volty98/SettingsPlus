@@ -82,13 +82,56 @@
     $html_render .= '<option value="true" ' . ($this->getValue('maintenanceMode') === true ? 'selected' : '') . '>On</option>';
     $html_render .= '<option value="false" ' . ($this->getValue('maintenanceMode') === false ? 'selected' : '') . '>Off</option>';
     $html_render .= '</select>';
-    $html_render .= '<small class="form-text text-muted">' . 'Enable maintenance mode to temporarily take the site offline.' . '</small>';
+    $html_render .= '<small class="form-text text-muted mb-3">' . 'Enable maintenance mode to temporarily take the site offline.' . '</small>';
     $html_render .= '<div class="input-group">';
     $html_render .= '<input type="text" class="form-control" name="maintenanceMessage" value="' . $this->getValue('maintenanceMessage') . '" placeholder="Maintenance message">';
     $html_render .= '</div>';
     $html_render .= '<small class="form-text text-muted">' . 'This message will be displayed when the site is in maintenance mode.' . '</small>';
     $html_render .= '</div>';
     $html_render .= '</div>';
+
+    // ログインページ隠ぺい設定
+    $html_render .= '<div class="form-group row">';
+    $html_render .= '<label class="col-sm-4 col-form-label" for="hideLoginPage">' . 'Hide login page' . '</label>';
+    $html_render .= '<div class="col-sm-8">';
+    $html_render .= '<select class="custom-select" id="hideLoginPage" name="hideLoginPage">';
+    $html_render .= '<option value="true" ' . ($this->getValue('hideLoginPage') === true ? 'selected' : '') . '>Enabled</option>';
+    $html_render .= '<option value="false" ' . ($this->getValue('hideLoginPage') === false ? 'selected' : '') . '>Disabled</option>';
+    $html_render .= '</select>';
+    $html_render .= '<small class="form-text text-muted mb-3">' . 'When enabled, the login page requires a query.' . '</small>';
+
+    $html_render .= '<div class="input-group mb-3 input-group-sm">';
+    $html_render .= '<div class="input-group-prepend"><span class="input-group-text">' . 'Token' . '</span></div>';
+    $html_render .= '<input type="text" class="form-control font-weight-bold" name="loginToken" value="' . $this->getValue('loginToken') . '"></input>';
+    $html_render .= '<div class="input-group-append">';
+    $html_render .= '<button type="button" id="generateToken" class="btn btn-outline-primary">' . 'Generate token' . '</button>';
+    $html_render .= '</div>';
+    $html_render .= '</div>';
+
+    $html_render .= '<div class="input-group input-group-sm">';
+    $html_render .= '<div class="input-group-prepend"><span class="input-group-text">' . 'Access URL' . '</span></div>';
+    $html_render .= '<input type="text" class="form-control readonly font-weight-bold" id="generateTokenURL" value="' . DOMAIN_ADMIN . '?token=' . $this->getValue('loginToken') . '" readonly></input>';
+    $html_render .= '</div>';
+    $html_render .= '<small class="form-text text-info font-weight-bold mb-3">' . '[CAUTION] If you lose the token, you will not be able to access the login page.' . '</small>';
+
+    $html_render .= '</div>';
+    $html_render .= '</div>';
+
+    // "Generate token" ボタンのクリックイベント
+    $html_render .= '<script>';
+    $html_render .= 'document.getElementById("generateToken").addEventListener("click", function() {';
+    $html_render .= '  var token = Math.random().toString(36).substr(2);';
+    $html_render .= '  document.querySelector("input[name=\'loginToken\']").value = token;';
+    $html_render .= '  document.getElementById("generateTokenURL").value = "' . DOMAIN_ADMIN . '?token=" + token;';
+    $html_render .= '});';
+    $html_render .= '</script>';
+    // "Access URL" を更新 name="loginToken" の値に応じて
+    $html_render .= '<script>';
+    $html_render .= 'document.querySelector("input[name=\'loginToken\']").addEventListener("input", function() {';
+    $html_render .= '  var token = this.value;';
+    $html_render .= '  document.getElementById("generateTokenURL").value = "' . DOMAIN_ADMIN . '?token=" + token;';
+    $html_render .= '});';
+    $html_render .= '</script>';
 
     // ファイル選択後に自動送信
     $html_render .= '<script>';

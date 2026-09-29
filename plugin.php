@@ -34,6 +34,8 @@ class pluginSettingsPlus extends Plugin
             'awesomeURL' => 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css',
             'maintenanceMode' => false,
             'maintenanceMessage' => 'The site is currently in maintenance mode.',
+            'hideLoginPage' => false,
+            'loginToken' => 'OpenSesami'
         );
     }
 
@@ -150,6 +152,20 @@ class pluginSettingsPlus extends Plugin
      * --------------------------------------------------------- */
     public function beforeAdminLoad()
     {
+        global $layout;
+
+        // Hide login page
+        if($layout['view'] == 'login') {
+            if ($this->getValue('hideLoginPage')) {
+                $query = $_SERVER['QUERY_STRING'];
+                $token = isset($_GET['token']) ? $_GET['token'] : '';
+                if ($token !== $this->getValue('loginToken')) {
+                    header('HTTP/1.1 404 Not Found');
+                    exit;
+                }
+            }
+        }
+
         // Favicon in the admin
         if (!$this->getValue('enableFaviconAdmin')) {
             return;
