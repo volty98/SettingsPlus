@@ -13,7 +13,7 @@ class pluginSettingsPlus extends Plugin
         $this->pluginName =  substr(__CLASS__, 6); //先頭のpluginを除いたクラス名
 
         // プラグインフォルダ
-        $this->cssFile = $this->domainPath() . 'css/SettingsPlus.css';
+        $this->cssFile = $this->domainPath() . 'css/settingsplus.css';
 
         // Bludit の標準アップロードディレクトリ
         $this->uploadsDir = PATH_UPLOADS . $this->pluginName . DS;

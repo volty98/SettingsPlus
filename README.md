@@ -19,8 +19,8 @@
 
 ## インストール方法
 
-1. このリポジトリを `bl-plugins/SettingsPlus` としてBluditの `bl-plugins` ディレクトリに配置します。
-2. Bludit 管理画面の「プラグイン」ページから **Settings Plus** を有効化します。
+1. このリポジトリを `bl-plugins/settingsplus` としてBluditの `bl-plugins` ディレクトリに配置します。
+2. Bludit 管理画面の「プラグイン」ページから **SettingsPlus** を有効化します。
 3. サイドバーに追加される「Settings Plus」から設定画面を開きます。
 
 ## 動作要件
